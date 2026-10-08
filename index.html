@@ -1,0 +1,1412 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Liquid Metal WebGL Button - Playground & Demo</title>
+    <style>
+      :root {
+        --page-bg: #090a0f;
+      }
+      html {
+        box-sizing: border-box;
+      }
+      *, *::before, *::after {
+        box-sizing: inherit;
+      }
+      body {
+        background: var(--page-bg);
+        color: white;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+        margin: 0;
+        padding: 30px 20px 80px 20px;
+        transition: background 0.3s ease;
+        overflow-x: hidden;
+        max-width: 100vw;
+      }
+
+      /* Master Layout: 2-column on desktop, drawer on mobile */
+      .app-layout {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 28px;
+        max-width: 1400px;
+        margin: 0 auto;
+        width: 100%;
+        min-width: 0;
+      }
+
+      .main-content {
+        flex: 1 1 0;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        width: 100%;
+      }
+
+      /* Header */
+      .header {
+        text-align: left;
+      }
+      .header h1 {
+        margin: 0 0 8px;
+        font-size: clamp(24px, 4vw, 32px);
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        background: linear-gradient(135deg, #ffffff 40%, #888888);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .header p {
+        margin: 0;
+        color: #9ca3af;
+        font-size: 14px;
+        line-height: 1.6;
+        max-width: 720px;
+      }
+
+      /* Hero Playground Box */
+      .playground-hero {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 36px 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        position: relative;
+        backdrop-filter: blur(8px);
+        min-width: 0;
+      }
+      .hero-top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .playground-hero h2 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #aaa;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+
+      .hero-button-wrapper {
+        min-height: 110px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+      }
+
+      /* Section Title */
+      .section-header {
+        margin-top: 10px;
+      }
+      .section-header-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .section-header h2 {
+        margin: 0 0 6px;
+        font-size: 20px;
+        font-weight: 600;
+        color: #f3f4f6;
+      }
+      .section-header p {
+        margin: 0;
+        font-size: 13px;
+        color: #9ca3af;
+      }
+      .expand-all-btn {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #93c5fd;
+        padding: 7px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+      }
+      .expand-all-btn:hover {
+        background: rgba(147, 197, 253, 0.15);
+        color: #bfdbfe;
+        border-color: rgba(147, 197, 253, 0.35);
+      }
+
+      /* Showcase Grid */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+        width: 100%;
+        min-width: 0;
+      }
+      .card {
+        text-align: left;
+        padding: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(8px);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 16px;
+        transition: border-color 0.2s, background 0.2s;
+        min-width: 0;
+      }
+      .card:hover {
+        border-color: rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .card-header h3 {
+        margin: 0 0 6px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #f3f4f6;
+      }
+      .card-header p.desc {
+        margin: 0;
+        font-size: 12px;
+        color: #9ca3af;
+        line-height: 1.4;
+      }
+      .btn-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px 0;
+        width: 100%;
+        min-height: 72px;
+      }
+
+      /* Expand Code Button */
+      .code-toggle-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #93c5fd;
+        padding: 7px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        width: 100%;
+        margin-top: auto;
+      }
+      .code-toggle-btn:hover {
+        background: rgba(147, 197, 253, 0.15);
+        border-color: rgba(147, 197, 253, 0.35);
+        color: #bfdbfe;
+      }
+      .code-toggle-btn .chevron {
+        font-size: 10px;
+        transition: transform 0.25s ease;
+      }
+      .code-toggle-btn.open .chevron {
+        transform: rotate(180deg);
+      }
+
+      .hero-code-toggle {
+        width: auto;
+        padding: 6px 14px;
+        background: rgba(147, 197, 253, 0.08);
+      }
+
+      /* Collapsible Code Container */
+      .code-collapse {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+        opacity: 0;
+        width: 100%;
+        min-width: 0;
+      }
+      .code-collapse.open {
+        max-height: 800px;
+        opacity: 1;
+        margin-top: 10px;
+      }
+      .code-box {
+        background: #06070a;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        overflow: hidden;
+        width: 100%;
+        min-width: 0;
+      }
+      .code-box-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 12px;
+        background: rgba(255, 255, 255, 0.04);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        gap: 8px;
+      }
+      .code-box-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        overflow: hidden;
+      }
+      .code-lang {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #60a5fa;
+      }
+      .code-hint {
+        font-size: 11px;
+        color: #6b7280;
+        white-space: nowrap;
+      }
+      .copy-btn {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #e5e7eb;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        white-space: nowrap;
+      }
+      .copy-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+      }
+      .code-box pre {
+        margin: 0;
+        padding: 12px;
+        overflow-x: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 12px;
+        line-height: 1.5;
+        color: #e2e8f0;
+      }
+
+      /* Settings Panel (Sidebar on desktop, drawer on mobile) */
+      #settings-panel {
+        width: 320px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 24px;
+        background: rgba(20, 22, 28, 0.96);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 20px;
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+        z-index: 100;
+        color: #fff;
+        backdrop-filter: blur(20px);
+        box-sizing: border-box;
+      }
+      .panel-header {
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #8bb4f8;
+        margin: 2px 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .close-drawer-btn {
+        background: none;
+        border: none;
+        color: #aaa;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 0 4px;
+        line-height: 1;
+        display: none;
+      }
+      .close-drawer-btn:hover {
+        color: #fff;
+      }
+      .divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+        margin: 2px 0;
+      }
+      .setting-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 13px;
+      }
+      .setting-label {
+        display: inline-flex;
+        align-items: center;
+        color: #ccc;
+      }
+      .info-tip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.12);
+        color: #aaa;
+        font-size: 10px;
+        cursor: help;
+        position: relative;
+        margin-left: 6px;
+        user-select: none;
+        font-style: normal;
+        font-weight: bold;
+      }
+      .info-tip:hover {
+        background: #8bb4f8;
+        color: #000;
+      }
+      .info-tip:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        right: 24px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #18191c;
+        color: #f1f2f4;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        line-height: 1.3;
+        max-width: 220px;
+        white-space: normal;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+        z-index: 99999;
+        pointer-events: none;
+        font-weight: normal;
+        text-align: left;
+      }
+      .setting-row input[type="color"] {
+        border: none;
+        width: 32px;
+        height: 26px;
+        padding: 0;
+        border-radius: 4px;
+        cursor: pointer;
+        background: transparent;
+      }
+      .setting-row input[type="range"] {
+        width: 110px;
+        cursor: pointer;
+      }
+      .setting-row input[type="text"] {
+        width: 110px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 4px 6px;
+        border-radius: 4px;
+        font-size: 12px;
+        box-sizing: border-box;
+      }
+      .preset-btn-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 4px;
+      }
+      .preset-btn {
+        padding: 8px 10px;
+        cursor: pointer;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 12px;
+        transition: all 0.2s;
+      }
+      #preset-light {
+        background: #ffffff;
+        color: #000000;
+        border: none;
+      }
+      #preset-light:hover {
+        background: #e5e5e5;
+      }
+      #preset-dark {
+        background: #14161a;
+        color: #ffffff;
+        border: 1px solid #333a44;
+      }
+      #preset-dark:hover {
+        background: #20242b;
+      }
+
+      /* Floating Button for Mobile / Narrow Viewports */
+      #floating-settings-toggle {
+        display: none;
+        position: fixed;
+        bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+        right: 20px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 999px;
+        padding: 12px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.5);
+        cursor: pointer;
+        z-index: 999;
+        transition: transform 0.2s, background 0.2s;
+      }
+      #floating-settings-toggle:hover {
+        background: #1d4ed8;
+        transform: translateY(-2px);
+      }
+
+      /* Backdrop Overlay */
+      #settings-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        z-index: 1500;
+      }
+
+      /* Utility classes for demo */
+      .custom-tailwind-demo {
+        height: 52px;
+        border-radius: 14px;
+        padding-left: 26px;
+        padding-right: 26px;
+        color: #ffb3d9;
+        background-color: #1a0814;
+        border: 1px solid rgba(255, 68, 170, 0.4);
+        font-weight: 600;
+        font-size: 14px;
+        gap: 8px;
+      }
+      .custom-disabled-demo {
+        height: 52px;
+        border-radius: 14px;
+        padding-left: 22px;
+        padding-right: 22px;
+        color: #888888;
+        background-color: #151515;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-weight: 500;
+        font-size: 13px;
+      }
+
+      /* RESPONSIVE BREAKPOINTS */
+      @media (max-width: 1200px) {
+        .app-layout {
+          flex-direction: column;
+        }
+        #settings-panel {
+          position: fixed;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          width: 320px;
+          height: 100vh;
+          max-height: 100vh;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          padding-bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+          border-radius: 0;
+          border-left: 1px solid rgba(255, 255, 255, 0.2);
+          border-top: none;
+          border-bottom: none;
+          border-right: none;
+          transform: translateX(100%);
+          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          z-index: 2000;
+        }
+        #settings-panel.drawer-open {
+          transform: translateX(0);
+        }
+        #floating-settings-toggle {
+          display: flex;
+        }
+        .close-drawer-btn {
+          display: block;
+        }
+        #settings-overlay.active {
+          opacity: 1;
+          pointer-events: auto;
+        }
+      }
+
+      @media (max-width: 640px) {
+        body {
+          padding: 16px 12px calc(80px + env(safe-area-inset-bottom, 0px)) 12px;
+        }
+        .grid {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        .playground-hero {
+          padding: 24px 14px;
+          border-radius: 14px;
+        }
+        .card {
+          padding: 18px;
+          border-radius: 14px;
+        }
+        #settings-panel {
+          width: 100%;
+          max-width: 320px;
+        }
+        .section-header-top {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- Main Layout Container -->
+    <div class="app-layout">
+
+      <!-- Left Column: Content, Playground & Integration Showcase -->
+      <main class="main-content">
+        <!-- Header -->
+        <div class="header">
+          <h1>Liquid Metal WebGL Button</h1>
+          <p>
+            Nút bấm hiệu ứng khúc xạ chất lỏng kim loại và sóng phản chiếu ánh sáng bằng WebGL 2.0.
+            Tùy biến dễ dàng qua class, CSS variables, slotting SVG icon hoặc JavaScript API.
+          </p>
+        </div>
+
+        <!-- 1. Live Interactive Playground Hero -->
+        <div class="playground-hero">
+          <div class="hero-top-bar">
+            <h2>Live Interactive Playground</h2>
+            <button class="code-toggle-btn hero-code-toggle" onclick="toggleCode(this, 'hero-code-box')">
+              <span class="icon">‹/›</span>
+              <span class="label">Mã nguồn nút hiện tại</span>
+              <span class="chevron">▼</span>
+            </button>
+          </div>
+
+          <div class="hero-button-wrapper">
+            <div id="hero-button-slot"></div>
+          </div>
+
+          <!-- Expandable Live Generated Code Box -->
+          <div id="hero-code-box" class="code-collapse">
+            <div class="code-box">
+              <div class="code-box-header">
+                <div class="code-box-title">
+                  <span class="code-lang">HTML Code</span>
+                  <span class="code-hint">(Tự cập nhật theo các thanh trượt và bảng màu)</span>
+                </div>
+                <button class="copy-btn" onclick="copySnippet(this)">Sao chép</button>
+              </div>
+              <pre><code id="live-hero-code">...</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Integration Showcase Section -->
+        <div class="section-header">
+          <div class="section-header-top">
+            <div>
+              <h2>Các cách tích hợp phổ biến</h2>
+              <p>Nhấp vào "Xem code" ở mỗi mục để xem chi tiết cách nhúng và copy mã nguồn.</p>
+            </div>
+            <button class="expand-all-btn" onclick="toggleAllCode(this)">
+              ⛶ Mở rộng tất cả code
+            </button>
+          </div>
+        </div>
+
+        <div class="grid">
+          <!-- Card 1: Slotting SVG + Span -->
+          <div class="card">
+            <div class="card-header">
+              <h3>1. Icon SVG + Slotting</h3>
+              <p class="desc">Truyền trực tiếp thẻ &lt;svg&gt; và &lt;span&gt; vào bên trong &lt;liquid-button&gt;.</p>
+            </div>
+            <div class="btn-wrapper">
+              <liquid-button
+                height="52"
+                radius="14px"
+                padding-x="26px"
+                font-size="14px"
+                font-weight="600"
+                gap="8px"
+                color="#ffd700"
+                border-color="rgba(255, 215, 0, 0.35)"
+                btn-bg="#141006"
+                fluid-color1="#ffaa00"
+                fluid-color2="#3a2500"
+                onclick="console.log('Subscribe button clicked')"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+                <span>Subscribe</span>
+              </liquid-button>
+            </div>
+
+            <button class="code-toggle-btn" onclick="toggleCode(this)">
+              <span class="icon">‹/›</span>
+              <span class="label">Xem code</span>
+              <span class="chevron">▼</span>
+            </button>
+            <div class="code-collapse">
+              <div class="code-box">
+                <div class="code-box-header">
+                  <span class="code-lang">HTML</span>
+                  <button class="copy-btn" onclick="copySnippet(this)">Sao chép</button>
+                </div>
+                <pre><code>&lt;liquid-button
+  height="52"
+  radius="14px"
+  padding-x="26px"
+  gap="8px"
+  color="#ffd700"
+  border-color="rgba(255, 215, 0, 0.35)"
+  btn-bg="#141006"
+  fluid-color1="#ffaa00"
+  fluid-color2="#3a2500"
+&gt;
+  &lt;svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+    &lt;polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"&gt;&lt;/polygon&gt;
+  &lt;/svg&gt;
+  &lt;span&gt;Subscribe&lt;/span&gt;
+&lt;/liquid-button&gt;</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Auto-fit Text -->
+          <div class="card">
+            <div class="card-header">
+              <h3>2. Text Attribute</h3>
+              <p class="desc">Khai báo nhanh qua thuộc tính <code>text="..."</code> với bo tròn viên thuốc.</p>
+            </div>
+            <div class="btn-wrapper">
+              <liquid-button
+                text="Get Started Free"
+                height="52"
+                radius="999px"
+                padding-x="28px"
+                font-weight="600"
+                color="#00ffff"
+                border-color="rgba(0, 255, 255, 0.3)"
+                btn-bg="#04121a"
+                fluid-color1="#00f0ff"
+                fluid-color2="#002b4d"
+                onclick="console.log('Get started clicked')"
+              ></liquid-button>
+            </div>
+
+            <button class="code-toggle-btn" onclick="toggleCode(this)">
+              <span class="icon">‹/›</span>
+              <span class="label">Xem code</span>
+              <span class="chevron">▼</span>
+            </button>
+            <div class="code-collapse">
+              <div class="code-box">
+                <div class="code-box-header">
+                  <span class="code-lang">HTML</span>
+                  <button class="copy-btn" onclick="copySnippet(this)">Sao chép</button>
+                </div>
+                <pre><code>&lt;liquid-button
+  text="Get Started Free"
+  height="52"
+  radius="999px"
+  padding-x="28px"
+  font-weight="600"
+  color="#00ffff"
+  border-color="rgba(0, 255, 255, 0.3)"
+  btn-bg="#04121a"
+  fluid-color1="#00f0ff"
+  fluid-color2="#002b4d"
+&gt;&lt;/liquid-button&gt;</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Tailwind Class Style -->
+          <div class="card">
+            <div class="card-header">
+              <h3>3. Tailwind Class Style</h3>
+              <p class="desc">Định kiểu bằng class CSS / Tailwind, CSS variables, và thuộc tính disabled.</p>
+            </div>
+            <div class="btn-wrapper" style="gap: 12px; flex-wrap: wrap;">
+              <liquid-button
+                class="custom-tailwind-demo"
+                style="--fluid-1: #ff007a; --fluid-2: #3a0022; --rim: #ff44aa;"
+                onclick="console.log('Class CTA clicked', this.dataset.tracking)"
+                data-tracking="hero-cta"
+                title="Unlock Pro"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="m13 2-2 2.5h3L11 8"></path>
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span>Class Styled</span>
+              </liquid-button>
+
+              <liquid-button
+                class="custom-disabled-demo"
+                disabled
+                onclick="console.log('Disabled clicked')"
+                title="Disabled"
+              >
+                <span>Disabled</span>
+              </liquid-button>
+            </div>
+
+            <button class="code-toggle-btn" onclick="toggleCode(this)">
+              <span class="icon">‹/›</span>
+              <span class="label">Xem code</span>
+              <span class="chevron">▼</span>
+            </button>
+            <div class="code-collapse">
+              <div class="code-box">
+                <div class="code-box-header">
+                  <span class="code-lang">HTML & Tailwind</span>
+                  <button class="copy-btn" onclick="copySnippet(this)">Sao chép</button>
+                </div>
+                <pre><code>&lt;!-- Nút bình thường --&gt;
+&lt;liquid-button
+  class="h-14 px-8 rounded-xl bg-neutral-900 border border-yellow-500/30 text-yellow-400 font-semibold text-sm gap-2.5"
+  style="--fluid-1: #ffaa00; --fluid-2: #3a2500; --rim: #ffd700;"
+  data-tracking="hero-cta"
+  onclick="console.log('Clicked')"
+&gt;
+  &lt;svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+    &lt;path d="m13 2-2 2.5h3L11 8"&gt;&lt;/path&gt;
+    &lt;polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"&gt;&lt;/polygon&gt;
+  &lt;/svg&gt;
+  &lt;span&gt;Class Styled&lt;/span&gt;
+&lt;/liquid-button&gt;
+
+&lt;!-- Nút bị khóa --&gt;
+&lt;liquid-button
+  class="h-12 px-6 rounded-xl bg-neutral-900 border border-white/10 text-neutral-500 text-sm"
+  disabled
+&gt;
+  &lt;span&gt;Disabled&lt;/span&gt;
+&lt;/liquid-button&gt;</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: Vanilla JS Instance -->
+          <div class="card">
+            <div class="card-header">
+              <h3>4. Vanilla JS Instance</h3>
+              <p class="desc">Khởi tạo và điều khiển trạng thái bằng JavaScript qua <code>LiquidButtonCore</code>.</p>
+            </div>
+            <div class="btn-wrapper">
+              <div id="vanilla-card-slot"></div>
+            </div>
+
+            <button class="code-toggle-btn" onclick="toggleCode(this)">
+              <span class="icon">‹/›</span>
+              <span class="label">Xem code</span>
+              <span class="chevron">▼</span>
+            </button>
+            <div class="code-collapse">
+              <div class="code-box">
+                <div class="code-box-header">
+                  <span class="code-lang">JavaScript</span>
+                  <button class="copy-btn" onclick="copySnippet(this)">Sao chép</button>
+                </div>
+                <pre><code>import { LiquidButtonCore } from './src/core/LiquidButtonCore.js';
+// Hoặc dùng window.LiquidButtonCore nếu dùng bản standalone
+
+const container = document.getElementById('button-slot');
+const button = new LiquidButtonCore(container, {
+  content: `
+    &lt;svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;
+      &lt;path d="M5 12h14M12 5l7 7-7 7"/&gt;
+    &lt;/svg&gt;
+    &lt;span&gt;Continue&lt;/span&gt;
+  `,
+  height: 52,
+  borderRadius: "12px",
+  paddingX: 28,
+  gap: 8,
+  textColor: "#ffffff",
+  borderColor: "rgba(255, 255, 255, 0.2)",
+  btnBg: "#161920",
+  fluidColor1: "#ff007a",
+  fluidColor2: "#4a00e0"
+});
+
+// Lắng nghe click
+button.btn.addEventListener('click', () => {
+  console.log('Button clicked');
+});</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 5: React Component -->
+          <div class="card">
+            <div class="card-header">
+              <h3>5. React Component</h3>
+              <p class="desc">Sử dụng trực tiếp component React với đầy đủ Props, TypeScript và Event handling.</p>
+            </div>
+            <div class="btn-wrapper">
+              <liquid-button
+                height="52"
+                radius="14px"
+                padding-x="26px"
+                font-weight="600"
+                font-size="14px"
+                gap="8px"
+                color="#00d8ff"
+                border-color="rgba(0, 216, 255, 0.35)"
+                btn-bg="#04141d"
+                fluid-color1="#00d8ff"
+                fluid-color2="#002b4d"
+                rim-color="#00d8ff"
+                ripple-color="#00d8ff"
+                onclick="console.log('React button clicked')"
+              >
+                <svg width="20" height="20" viewBox="-11.5 -10.23174 23 20.46348" fill="none">
+                  <circle cx="0" cy="0" r="2.05" fill="#00d8ff"></circle>
+                  <g stroke="#00d8ff" stroke-width="1" fill="none">
+                    <ellipse rx="11" ry="4.2"></ellipse>
+                    <ellipse rx="11" ry="4.2" transform="rotate(60)"></ellipse>
+                    <ellipse rx="11" ry="4.2" transform="rotate(120)"></ellipse>
+                  </g>
+                </svg>
+                <span>React Component</span>
+              </liquid-button>
+            </div>
+
+            <button class="code-toggle-btn" onclick="toggleCode(this)">
+              <span class="icon">‹/›</span>
+              <span class="label">Xem code</span>
+              <span class="chevron">▼</span>
+            </button>
+            <div class="code-collapse">
+              <div class="code-box">
+                <div class="code-box-header">
+                  <span class="code-lang">React JSX / TSX</span>
+                  <button class="copy-btn" onclick="copySnippet(this)">Sao chép</button>
+                </div>
+                <pre><code>import { LiquidButton } from './src/react/LiquidButton';
+
+export function ActionSection() {
+  return (
+    &lt;LiquidButton
+      height={52}
+      borderRadius="14px"
+      paddingX={26}
+      fluidColor1="#00d8ff"
+      fluidColor2="#002b4d"
+      textColor="#00d8ff"
+      borderColor="rgba(0, 216, 255, 0.35)"
+      btnBg="#04141d"
+      onClick={() => console.log('Clicked!')}
+    &gt;
+      &lt;svg width="20" height="20" viewBox="-11.5 -10.23174 23 20.46348" fill="none"&gt;
+        &lt;circle cx="0" cy="0" r="2.05" fill="#00d8ff" /&gt;
+        &lt;g stroke="#00d8ff" strokeWidth="1" fill="none"&gt;
+          &lt;ellipse rx="11" ry="4.2" /&gt;
+          &lt;ellipse rx="11" ry="4.2" transform="rotate(60)" /&gt;
+          &lt;ellipse rx="11" ry="4.2" transform="rotate(120)" /&gt;
+        &lt;/g&gt;
+      &lt;/svg&gt;
+      &lt;span&gt;Get Started&lt;/span&gt;
+    &lt;/LiquidButton&gt;
+  );
+}</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 6: CSS Variables & Theme -->
+          <div class="card">
+            <div class="card-header">
+              <h3>6. CSS Variables & Theme</h3>
+              <p class="desc">Tùy biến bảng màu và hiệu ứng hoàn toàn qua CSS variables trong stylesheet riêng.</p>
+            </div>
+            <div class="btn-wrapper">
+              <liquid-button
+                height="52"
+                radius="14px"
+                padding-x="26px"
+                font-weight="600"
+                font-size="14px"
+                gap="8px"
+                style="--fluid-1: #c084fc; --fluid-2: #3b0764; --rim: #e9d5ff; --ripple: #f3e8ff; --btn-bg: #13091f; --btn-border: rgba(192, 132, 252, 0.35); --text-color: #f3e8ff;"
+                onclick="console.log('CSS Variables button clicked')"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+                </svg>
+                <span>Neon Palette</span>
+              </liquid-button>
+            </div>
+
+            <button class="code-toggle-btn" onclick="toggleCode(this)">
+              <span class="icon">‹/›</span>
+              <span class="label">Xem code</span>
+              <span class="chevron">▼</span>
+            </button>
+            <div class="code-collapse">
+              <div class="code-box">
+                <div class="code-box-header">
+                  <span class="code-lang">CSS & HTML</span>
+                  <button class="copy-btn" onclick="copySnippet(this)">Sao chép</button>
+                </div>
+                <pre><code>/* 1. Trong file CSS */
+.purple-neon-btn {
+  --fluid-1: #c084fc;
+  --fluid-2: #3b0764;
+  --rim: #e9d5ff;
+  --ripple: #f3e8ff;
+  --btn-bg: #13091f;
+  --btn-border: rgba(192, 132, 252, 0.35);
+  --text-color: #f3e8ff;
+}
+
+/* 2. Trong HTML */
+&lt;liquid-button
+  class="purple-neon-btn"
+  height="52"
+  radius="14px"
+  padding-x="26px"
+&gt;
+  &lt;span&gt;Neon Palette&lt;/span&gt;
+&lt;/liquid-button&gt;</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Right Column: Settings Panel (Sticky Sidebar on Desktop, Drawer on Mobile) -->
+      <aside id="settings-panel">
+        <div class="panel-header">
+          <span>Color Settings</span>
+          <button class="close-drawer-btn" onclick="toggleSettingsDrawer()" title="Đóng">✕</button>
+        </div>
+        <div class="divider"></div>
+
+        <div class="setting-row">
+          <span class="setting-label">
+            Page Background
+            <i class="info-tip" data-tooltip="Màu nền của trang web (CSS)">?</i>
+          </span>
+          <input type="color" id="set-page-bg" value="#090a0f" />
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">
+            Button Text
+            <i class="info-tip" data-tooltip="Màu chữ hiển thị trên nút">?</i>
+          </span>
+          <input type="color" id="set-text" value="#ffffff" />
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">
+            Button Base
+            <i class="info-tip" data-tooltip="Màu nền tĩnh thân nút bên dưới WebGL">?</i>
+          </span>
+          <input type="color" id="set-btn-bg" value="#0b0c0e" />
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">
+            Border Color
+            <i class="info-tip" data-tooltip="Màu viền bao quanh thân nút">?</i>
+          </span>
+          <input type="color" id="set-border" value="#333a44" />
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">
+            Fluid Color 1
+            <i class="info-tip" data-tooltip="Màu gradient sóng lỏng số 1 (WebGL)">?</i>
+          </span>
+          <input type="color" id="set-fluid-1" value="#ffffff" />
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">
+            Fluid Color 2
+            <i class="info-tip" data-tooltip="Màu gradient sóng lỏng số 2 (WebGL)">?</i>
+          </span>
+          <input type="color" id="set-fluid-2" value="#4400ff" />
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">
+            Rim Highlight
+            <i class="info-tip" data-tooltip="Màu tia sáng chạy dọc viền nút">?</i>
+          </span>
+          <input type="color" id="set-rim" value="#ffffff" />
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">
+            Ripple Edge
+            <i class="info-tip" data-tooltip="Màu gợn sóng lan tỏa khi nhấp chuột">?</i>
+          </span>
+          <input type="color" id="set-ripple" value="#ffffff" />
+        </div>
+
+        <div class="panel-header" style="margin-top: 6px">
+          <span>Style Settings</span>
+        </div>
+        <div class="divider"></div>
+
+        <div class="setting-row">
+          <span class="setting-label">
+            Text Label
+            <i class="info-tip" data-tooltip="Nội dung chữ hiển thị trên nút">?</i>
+          </span>
+          <input type="text" id="set-label" value="Subscribe" />
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">
+            Height / Size
+            <i class="info-tip" data-tooltip="Chiều cao của nút (30 - 120px)">?</i>
+          </span>
+          <input type="range" id="set-height" min="30" max="120" value="60" />
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">
+            Border Radius
+            <i class="info-tip" data-tooltip="Độ bo tròn góc (0px = vuông, 60px = viên thuốc)">?</i>
+          </span>
+          <input type="range" id="set-radius" min="0" max="60" value="60" />
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">
+            Padding Trong
+            <i class="info-tip" data-tooltip="Khoảng cách đệm ngang hai bên nút">?</i>
+          </span>
+          <input type="range" id="set-padding" min="10" max="80" value="34" />
+        </div>
+
+        <div class="divider"></div>
+        <div class="preset-btn-group">
+          <button id="preset-light" class="preset-btn">Light Mode</button>
+          <button id="preset-dark" class="preset-btn">Dark Mode</button>
+        </div>
+      </aside>
+
+    </div>
+
+    <!-- Floating Trigger Button for Mobile / Small Screens (< 1200px) -->
+    <button id="floating-settings-toggle" onclick="toggleSettingsDrawer()">
+      <span>⚙️ Tùy chỉnh màu & kiểu</span>
+    </button>
+
+    <!-- Backdrop Overlay for Mobile Drawer -->
+    <div id="settings-overlay" onclick="toggleSettingsDrawer()"></div>
+
+    <!-- Nhúng thư viện Standalone (hoạt động trực tiếp cả file:// lẫn http://) -->
+    <script src="./src/standalone/liquid-button-standalone.js"></script>
+    <script>
+      // 1. Khởi tạo Hero Button cho Interactive Playground
+      const heroContainer = document.getElementById("hero-button-slot");
+      const heroButton = new window.LiquidButtonCore(heroContainer, {
+        text: "Subscribe",
+        height: 60,
+        borderRadius: "999px",
+        borderColor: "#333a44",
+        textColor: "#ffffff",
+        btnBg: "#0b0c0e",
+        btnBgHot: "#08090a",
+        btnBgPress: "#070809",
+        fluidColor1: "#ffffff",
+        fluidColor2: "#4400ff",
+        rimColor: "#ffffff",
+        rippleColor: "#ffffff",
+        paddingX: 34
+      });
+
+      heroButton.btn.addEventListener("click", () => {
+        console.log("Hero playground button clicked");
+      });
+
+      // Hàm sinh code thời gian thực cho Hero Playground
+      function updateLiveHeroCode() {
+        const text = document.getElementById("set-label").value || "Subscribe";
+        const height = document.getElementById("set-height").value;
+        const radVal = parseInt(document.getElementById("set-radius").value, 10);
+        const radius = radVal >= 55 ? "999px" : radVal + "px";
+        const padX = document.getElementById("set-padding").value + "px";
+        const textColor = document.getElementById("set-text").value;
+        const btnBg = document.getElementById("set-btn-bg").value;
+        const border = document.getElementById("set-border").value;
+        const fluid1 = document.getElementById("set-fluid-1").value;
+        const fluid2 = document.getElementById("set-fluid-2").value;
+        const rim = document.getElementById("set-rim").value;
+        const ripple = document.getElementById("set-ripple").value;
+
+        const code = `<liquid-button
+  text="${text}"
+  height="${height}"
+  radius="${radius}"
+  padding-x="${padX}"
+  color="${textColor}"
+  btn-bg="${btnBg}"
+  border-color="${border}"
+  fluid-color1="${fluid1}"
+  fluid-color2="${fluid2}"
+  rim-color="${rim}"
+  ripple-color="${ripple}"
+></liquid-button>`;
+
+        const codeEl = document.getElementById("live-hero-code");
+        if (codeEl) codeEl.textContent = code;
+      }
+      updateLiveHeroCode();
+
+      // 2. Kết nối toàn bộ bảng điều khiển Settings Panel vào Hero Button
+      const root = document.documentElement;
+
+      document.getElementById("set-page-bg").addEventListener("input", (e) => {
+        root.style.setProperty("--page-bg", e.target.value);
+        updateLiveHeroCode();
+      });
+
+      document.getElementById("set-text").addEventListener("input", (e) => {
+        heroButton.updateOptions({ textColor: e.target.value });
+        updateLiveHeroCode();
+      });
+
+      document.getElementById("set-btn-bg").addEventListener("input", (e) => {
+        heroButton.updateOptions({
+          btnBg: e.target.value,
+          btnBgHot: e.target.value,
+          btnBgPress: e.target.value,
+        });
+        updateLiveHeroCode();
+      });
+
+      document.getElementById("set-border").addEventListener("input", (e) => {
+        heroButton.updateOptions({ borderColor: e.target.value });
+        updateLiveHeroCode();
+      });
+
+      document.getElementById("set-fluid-1").addEventListener("input", (e) => {
+        heroButton.updateOptions({ fluidColor1: e.target.value });
+        updateLiveHeroCode();
+      });
+
+      document.getElementById("set-fluid-2").addEventListener("input", (e) => {
+        heroButton.updateOptions({ fluidColor2: e.target.value });
+        updateLiveHeroCode();
+      });
+
+      document.getElementById("set-rim").addEventListener("input", (e) => {
+        heroButton.updateOptions({ rimColor: e.target.value });
+        updateLiveHeroCode();
+      });
+
+      document.getElementById("set-ripple").addEventListener("input", (e) => {
+        heroButton.updateOptions({ rippleColor: e.target.value });
+        updateLiveHeroCode();
+      });
+
+      document.getElementById("set-label").addEventListener("input", (e) => {
+        heroButton.updateOptions({ text: e.target.value });
+        updateLiveHeroCode();
+      });
+
+      document.getElementById("set-height").addEventListener("input", (e) => {
+        heroButton.updateOptions({ height: parseInt(e.target.value, 10) });
+        updateLiveHeroCode();
+      });
+
+      document.getElementById("set-radius").addEventListener("input", (e) => {
+        const val = parseInt(e.target.value, 10);
+        heroButton.updateOptions({
+          borderRadius: val >= 55 ? "999px" : val + "px",
+        });
+        updateLiveHeroCode();
+      });
+
+      document.getElementById("set-padding").addEventListener("input", (e) => {
+        heroButton.updateOptions({
+          paddingX: parseInt(e.target.value, 10),
+        });
+        updateLiveHeroCode();
+      });
+
+      // Preset: Light Mode
+      document.getElementById("preset-light").addEventListener("click", () => {
+        document.getElementById("set-page-bg").value = "#f6f8fa";
+        document.getElementById("set-text").value = "#111827";
+        document.getElementById("set-btn-bg").value = "#ffffff";
+        document.getElementById("set-border").value = "#cbd5e1";
+        document.getElementById("set-fluid-1").value = "#ffffff";
+        document.getElementById("set-fluid-2").value = "#0077ff";
+        document.getElementById("set-rim").value = "#0066ff";
+        document.getElementById("set-ripple").value = "#0066ff";
+
+        [
+          "set-page-bg",
+          "set-text",
+          "set-btn-bg",
+          "set-border",
+          "set-fluid-1",
+          "set-fluid-2",
+          "set-rim",
+          "set-ripple",
+        ].forEach((id) => {
+          document.getElementById(id).dispatchEvent(new Event("input"));
+        });
+        document.querySelectorAll("h1, h2, h3").forEach((el) => (el.style.color = "#111827"));
+      });
+
+      // Preset: Dark Mode
+      document.getElementById("preset-dark").addEventListener("click", () => {
+        document.getElementById("set-page-bg").value = "#090a0f";
+        document.getElementById("set-text").value = "#ffffff";
+        document.getElementById("set-btn-bg").value = "#0b0c0e";
+        document.getElementById("set-border").value = "#333a44";
+        document.getElementById("set-fluid-1").value = "#ffffff";
+        document.getElementById("set-fluid-2").value = "#4400ff";
+        document.getElementById("set-rim").value = "#ffffff";
+        document.getElementById("set-ripple").value = "#ffffff";
+
+        [
+          "set-page-bg",
+          "set-text",
+          "set-btn-bg",
+          "set-border",
+          "set-fluid-1",
+          "set-fluid-2",
+          "set-rim",
+          "set-ripple",
+        ].forEach((id) => {
+          document.getElementById(id).dispatchEvent(new Event("input"));
+        });
+        document.querySelectorAll("h1, h2, h3").forEach((el) => (el.style.color = ""));
+      });
+
+      // 3. Khởi tạo Card 4 (Vanilla JS Instance)
+      const vanillaCardContainer = document.getElementById("vanilla-card-slot");
+      const cardButton = new window.LiquidButtonCore(vanillaCardContainer, {
+        content: `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14"></path>
+            <path d="m12 5 7 7-7 7"></path>
+          </svg>
+          <span>Continue</span>
+        `,
+        height: 52,
+        borderRadius: "12px",
+        paddingX: 28,
+        gap: 8,
+        fontWeight: "600",
+        textColor: "#ffffff",
+        borderColor: "rgba(255, 255, 255, 0.2)",
+        btnBg: "#161920",
+        fluidColor1: "#ff007a",
+        fluidColor2: "#4a00e0"
+      });
+
+      cardButton.btn.addEventListener("click", () => {
+        console.log("Vanilla JS card button clicked");
+      });
+
+      // 4. Các hàm xử lý UI: Toggle Code, Copy Snippet, Toggle Drawer
+      function toggleAllCode(btn) {
+        const allCollapses = document.querySelectorAll(".grid .code-collapse");
+        const allBtns = document.querySelectorAll(".grid .code-toggle-btn");
+        const anyClosed = Array.from(allCollapses).some((el) => !el.classList.contains("open"));
+
+        allCollapses.forEach((el) => el.classList.toggle("open", anyClosed));
+        allBtns.forEach((b) => {
+          b.classList.toggle("open", anyClosed);
+          const label = b.querySelector(".label");
+          if (label) label.textContent = anyClosed ? "Ẩn code" : "Xem code";
+        });
+
+        btn.textContent = anyClosed ? "✕ Thu gọn tất cả" : "⛶ Mở rộng tất cả code";
+      }
+
+      function toggleCode(btn, explicitId) {
+        let target;
+        if (explicitId) {
+          target = document.getElementById(explicitId);
+        } else {
+          const card = btn.closest(".card, .playground-hero");
+          target = card ? card.querySelector(".code-collapse") : null;
+        }
+        if (!target) return;
+
+        const isOpen = target.classList.toggle("open");
+        btn.classList.toggle("open", isOpen);
+
+        const label = btn.querySelector(".label");
+        if (label) {
+          if (explicitId === "hero-code-box") {
+            label.textContent = isOpen ? "Ẩn mã nguồn" : "Mã nguồn nút hiện tại";
+          } else {
+            label.textContent = isOpen ? "Ẩn code" : "Xem code";
+          }
+        }
+      }
+
+      function copySnippet(btn) {
+        const codeBox = btn.closest(".code-box");
+        const code = codeBox.querySelector("code");
+        if (!code) return;
+
+        navigator.clipboard.writeText(code.textContent.trim()).then(() => {
+          const original = btn.textContent;
+          btn.textContent = "✓ Đã sao chép!";
+          btn.style.color = "#34d399";
+          setTimeout(() => {
+            btn.textContent = original;
+            btn.style.color = "";
+          }, 2000);
+        });
+      }
+
+      function toggleSettingsDrawer() {
+        const panel = document.getElementById("settings-panel");
+        const overlay = document.getElementById("settings-overlay");
+        panel.classList.toggle("drawer-open");
+        overlay.classList.toggle("active");
+      }
+    </script>
+  </body>
+</html>

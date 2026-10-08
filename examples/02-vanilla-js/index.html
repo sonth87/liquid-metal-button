@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ví dụ 2: Vanilla JS</title>
+  <style>
+    body {
+      background: #0b0c10;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      gap: 20px;
+    }
+    h1 { margin: 0; font-size: 24px; font-weight: 600; }
+    p { margin: 0 0 20px; color: #888; font-size: 14px; }
+    .controls { display: flex; gap: 10px; margin-top: 20px; }
+    button.btn-ctrl {
+      background: #1f2833;
+      color: #66fcf1;
+      border: 1px solid #45a29e;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    button.btn-ctrl:hover {
+      background: #45a29e;
+      color: #0b0c10;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Ví dụ 2: Điều khiển bằng Vanilla JavaScript</h1>
+  <p>Khởi tạo và điều khiển trạng thái nút bấm hoàn toàn bằng JavaScript qua <code>LiquidButtonCore</code>.</p>
+
+  <div id="btn-container"></div>
+
+  <div class="controls">
+    <button id="toggle-color" class="btn-ctrl">Đổi sang Màu Tím</button>
+    <button id="toggle-disabled" class="btn-ctrl">Toggle Disabled</button>
+  </div>
+
+  <!-- Nhúng thư viện standalone (chạy trực tiếp cả file:// lẫn http://) -->
+  <script src="../../src/standalone/liquid-button-standalone.js"></script>
+  <script>
+    const container = document.getElementById('btn-container');
+
+    // 1. Khởi tạo nút bấm bằng LiquidButtonCore
+    const button = new window.LiquidButtonCore(container, {
+      content: `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+        <span>Nạp xu ngay</span>
+      `,
+      height: 54,
+      borderRadius: "14px",
+      paddingX: 30,
+      textColor: "#ffd700",
+      borderColor: "rgba(255, 215, 0, 0.35)",
+      btnBg: "#161305",
+      fluidColor1: "#ffaa00",
+      fluidColor2: "#4a3300"
+    });
+
+    button.btn.addEventListener('click', () => {
+      console.log('Button clicked');
+    });
+
+    // 2. Điều khiển thông số động bằng updateOptions
+    let isPurple = false;
+    document.getElementById('toggle-color').addEventListener('click', () => {
+      isPurple = !isPurple;
+      button.updateOptions({
+        textColor: isPurple ? "#f3e8ff" : "#ffd700",
+        borderColor: isPurple ? "rgba(168, 85, 247, 0.4)" : "rgba(255, 215, 0, 0.35)",
+        btnBg: isPurple ? "#1b0a2a" : "#161305",
+        fluidColor1: isPurple ? "#c084fc" : "#ffaa00",
+        fluidColor2: isPurple ? "#3b0764" : "#4a3300"
+      });
+    });
+
+    let isDisabled = false;
+    document.getElementById('toggle-disabled').addEventListener('click', () => {
+      isDisabled = !isDisabled;
+      button.updateOptions({ disabled: isDisabled });
+    });
+  </script>
+</body>
+</html>

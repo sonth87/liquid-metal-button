@@ -1,0 +1,73 @@
+{
+  "name": "liquid-metal-button",
+  "version": "1.0.0",
+  "description": "Luxury WebGL Liquid Metal Button with dynamic fluid ripples and iridescent reflections for Vanilla JS, React, TypeScript, and Web Components.",
+  "homepage": "https://liquid-metal-btn.vercel.app/",
+  "type": "module",
+  "main": "./index.js",
+  "module": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./core": {
+      "types": "./index.d.ts",
+      "import": "./src/core/LiquidButtonCore.js"
+    },
+    "./react": {
+      "types": "./index.d.ts",
+      "import": "./src/react/LiquidButton.jsx"
+    },
+    "./element": {
+      "types": "./index.d.ts",
+      "import": "./src/web-component/LiquidButtonElement.js"
+    },
+    "./web-component": {
+      "types": "./index.d.ts",
+      "import": "./src/web-component/LiquidButtonElement.js"
+    },
+    "./standalone": "./src/standalone/liquid-button-standalone.js"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "src",
+    "screenshots",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "vite --open index.html",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "vite": "^5.2.0"
+  },
+  "keywords": [
+    "webgl",
+    "webgl2",
+    "liquid-metal",
+    "button",
+    "ui-component",
+    "react",
+    "web-component",
+    "typescript",
+    "shaders"
+  ],
+  "license": "MIT"
+}
